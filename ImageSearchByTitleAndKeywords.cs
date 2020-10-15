@@ -339,7 +339,7 @@ namespace BeaconHill_Coding_Test
                 case 8: box = SelectPic8; pic = pic8; break;
                 default: throw new Exception("Bad input.");
             }
-            if (box.Checked)
+            if (box.CheckState == CheckState.Checked)
             {
                 if (pickedImageFiles.Count < 3)
                 {
@@ -348,8 +348,8 @@ namespace BeaconHill_Coding_Test
                 }
                 else
                 {
-                    box.Checked = false;
-                    pic.BackColor = Color.Empty;
+                    box.CheckState = CheckState.Unchecked;
+                    pic.BackColor = Color.Gray;
                     MessageBox.Show("Please limit your selection to 3 images.");
                 }
             }
