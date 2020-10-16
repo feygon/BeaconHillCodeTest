@@ -14,6 +14,8 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
+using GoogleSearchClasses;
+
 namespace BeaconHill_Coding_Test
 {
     /// <summary>
@@ -23,7 +25,7 @@ namespace BeaconHill_Coding_Test
     {
         List<string> keyWords = new List<string>();
         List<Image> availableImages = new List<Image>();
-        List<Image> pickedImageFiles = new List<Image>();
+        List<(Image img, int index)> pickedImageFiles = new List<(Image img, int index)>();
 
         #region Constructor
         /// <summary>
@@ -55,7 +57,7 @@ namespace BeaconHill_Coding_Test
                 string str = "You picked:";
                 foreach (var pic in pickedImageFiles)
                 {
-                    str = string.Concat(str, "\n", pic.Tag); // tags have image filenames.
+                    str = string.Concat(str, "\n", pic.img.Tag); // tags have image filenames.
                 }
                 MessageBox.Show(str);
             } else { MessageBox.Show("Please select at least one image."); }
@@ -63,7 +65,13 @@ namespace BeaconHill_Coding_Test
 
         private void SearchButton_Click(object sender, EventArgs e)
         {
-            ScanKeyWords();
+            string keyWords = ScanKeyWords();
+            //RunAsync().GetAwaiter().GetResult();
+            var GoogleCustomImageSearch = new GoogleSearch(null, null);
+            var x = GoogleCustomImageSearch.TBMISCH;
+            GoogleCustomImageSearch.Options.Add(x.Key, x.Value);
+            //basic search
+            GoogleCustomImageSearch.Search(keyWords);
         }
 
         private void BoldButton_Click(object sender, EventArgs e)
@@ -95,7 +103,7 @@ namespace BeaconHill_Coding_Test
         /// <summary>
         /// Scan parsed bold substrings of textbox into search keywords
         /// </summary>
-        private void ScanKeyWords()
+        private string ScanKeyWords()
         {
             keyWords.Clear();
             List<string> titleKeyWords = new List<string>(ScanTitle().AsEnumerable());
@@ -127,7 +135,7 @@ namespace BeaconHill_Coding_Test
             {
                 str = string.Concat(str, word, " ");
             }
-            MessageBox.Show(String.Format($"Will search for: {str}"));
+            return str;
         }
         #endregion
         #region PicPick Methods
@@ -324,26 +332,27 @@ namespace BeaconHill_Coding_Test
         /// <param name="v"></param>
         private void PicChecked(int v)
         {
+            int index = -42;
             CheckBox box;
             PictureBox pic;
             switch (v)
             {
-                case 0: box = SelectPic0; pic = pic0; break;
-                case 1: box = SelectPic1; pic = pic1; break;
-                case 2: box = SelectPic2; pic = pic2; break;
-                case 3: box = SelectPic3; pic = pic3; break;
-                case 4: box = SelectPic4; pic = pic4; break;
-                case 5: box = SelectPic5; pic = pic5; break;
-                case 6: box = SelectPic6; pic = pic6; break;
-                case 7: box = SelectPic7; pic = pic7; break;
-                case 8: box = SelectPic8; pic = pic8; break;
+                case 0: box = SelectPic0; pic = pic0; index = 0; break;
+                case 1: box = SelectPic1; pic = pic1; index = 1; break;
+                case 2: box = SelectPic2; pic = pic2; index = 2; break;
+                case 3: box = SelectPic3; pic = pic3; index = 3; break;
+                case 4: box = SelectPic4; pic = pic4; index = 4; break;
+                case 5: box = SelectPic5; pic = pic5; index = 5; break;
+                case 6: box = SelectPic6; pic = pic6; index = 6; break;
+                case 7: box = SelectPic7; pic = pic7; index = 7; break;
+                case 8: box = SelectPic8; pic = pic8; index = 8; break;
                 default: throw new Exception("Bad input.");
             }
             if (box.CheckState == CheckState.Checked)
             {
                 if (pickedImageFiles.Count < 3)
                 {
-                    pickedImageFiles.Add(pic.Image);
+                    pickedImageFiles.Add((pic.Image, index));
                     pic.BackColor = Color.Red;
                 }
                 else
@@ -355,14 +364,13 @@ namespace BeaconHill_Coding_Test
             }
             else
             {
-                if (pickedImageFiles.Contains(pic.Image))
+                pic.BackColor = Color.Empty;
+                if (pickedImageFiles.Contains((pic.Image, index)))
                 {
-                    pickedImageFiles.Remove(pic.Image);
+                    pickedImageFiles.Remove((pic.Image, index));
                 }
             }
         }
-
         #endregion
-
     }
 }
