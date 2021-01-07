@@ -20,7 +20,7 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 */
 
-using Newtonsoft.Json;
+using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -28,64 +28,9 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Web;
-using System.Windows.Forms;
-using System.Xml.Linq;
-
-using GoogleSearchClasses;
 
 namespace GoogleSearchClasses
 {
-    /// <summary>
-    /// This represents a single search result
-    /// </summary>
-    public class GoogleSearchResult
-    {
-        /// <summary>
-        /// The mine type of the resulting link
-        /// </summary>
-        public string Mime { get; set; }
-        /// <summary>
-        /// The URL of the result
-        /// </summary>
-        public string Url { get; set; }
-        /// <summary>
-        /// Title of the result
-        /// </summary>
-        public string Title { get; set; }
-        /// <summary>
-        /// Description that should show in results
-        /// </summary>
-        public string Description { get; set; }
-    }
-
-    /// <summary>
-    /// A collection for storing more advanced information about the search.
-    /// </summary>
-    public class GoogleSearchResults
-    {
-        /// <summary>
-        /// The normal organic search results
-        /// </summary>
-        public List<GoogleSearchResult> Results { get; set; }
-        /// <summary>
-        /// Specially designed search results. Advertisements. 
-        /// </summary>
-        public List<GoogleSearchResult> Promotions { get; set; }
-        /// <summary>
-        /// Possible search refinement labels 
-        /// </summary>
-        public Dictionary<string, string> Labels { get; set; }
-        /// <summary>
-        /// Total results, all these results might not actually be available.
-        /// </summary>
-        public long TotalResults { get; set; }
-        /// <summary>
-        /// Amount of time taken to preform the search.
-        /// </summary>
-        public double SearchTime { get; set; }
-    }
-
-
     // ReSharper disable InconsistentNaming
     /// <summary>
     /// No longer used, left in as to not change the api.
@@ -101,7 +46,6 @@ namespace GoogleSearchClasses
     public class GoogleSearch
     {
         private const string GoogleUrl = "http://www.google.com/search";
-        private const string GoogleCseUrl = "https://www.googleapis.com/customsearch/v1";
         private readonly int _maxPages;
         public readonly KeyValuePair<string, string> ImageSearchOption = new KeyValuePair<string, string>("data-defaultToImageSearch", "true");
         public readonly KeyValuePair<string, string> TBMISCH = new KeyValuePair<string, string>("tbm", "isch");
@@ -221,7 +165,7 @@ namespace GoogleSearchClasses
         /// <param name="term">Term to search</param>
         /// <param name="label">If you are using custom refinements this will help you search part of your site</param>
         /// <returns>List of Search Results</returns>
-        public void Search(string term, string label = "")
+        public List<(string URL, string alt)> Search(string term, string label = "")
         {
 
             if (!string.IsNullOrWhiteSpace(label))
@@ -232,8 +176,14 @@ namespace GoogleSearchClasses
             {
                 Options["q"] = term;
             }
+
             var url = BuildURL();
-            OutputResults(url);
+            List<HtmlNode> searchResult = OutputResults(url);
+            return searchResult.Select((res) => 
+                    ValueTuple.Create(
+                        (res.GetAttributeValue("src", null))
+                        ,res.GetAttributeValue("a", null)))
+                .ToList();
         }
 
         /// <summary>
@@ -242,22 +192,26 @@ namespace GoogleSearchClasses
         /// <param name="url"></param>
         /// <param name="depth"></param>
         /// <returns></returns>
-        private void OutputResults(string url, int depth = 1)
+        private List<HtmlNode> OutputResults(string url, int depth = 1)
         {
-            var ret = new List<GoogleSearchResult>();
-            try
+
+            using (var webClient = new WebClient())
             {
-                using (var webClient = new WebClient())
-                {
-                    webClient.Encoding = Encoding.UTF8;
-                    webClient.DownloadFile(url, "out.html");
-                    MessageBox.Show("A result html page has been generated, named \"out.html\"");
-                }
-            }
-            catch (Exception err)
-            {
-                Console.Error.Write(err);
-                //This happens if you reach your daily or user limit, or don't have the right Google public API key.
+                HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
+                
+
+                string html = webClient.DownloadString(url);
+
+
+
+                
+                doc.LoadHtml(html);
+                var imgNodes = doc.DocumentNode
+                    .Descendants("img")
+                    .Where((i) => !String.IsNullOrEmpty((i.GetAttributeValue("src", null))))
+                    .ToList();
+
+                return imgNodes;
             }
         }
     }

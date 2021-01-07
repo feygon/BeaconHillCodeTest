@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 
 namespace BeaconHill_Coding_Test
@@ -77,7 +78,7 @@ namespace BeaconHill_Coding_Test
             // 
             // TitleTextBox
             // 
-            this.TitleTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.TitleTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.TitleTextBox.Location = new System.Drawing.Point(12, 29);
             this.TitleTextBox.Name = "TitleTextBox";
@@ -105,7 +106,7 @@ namespace BeaconHill_Coding_Test
             // 
             // SlideTextRTBox
             // 
-            this.SlideTextRTBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.SlideTextRTBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.SlideTextRTBox.Location = new System.Drawing.Point(12, 73);
             this.SlideTextRTBox.Name = "SlideTextRTBox";
@@ -273,7 +274,6 @@ namespace BeaconHill_Coding_Test
             this.pic0.Size = new System.Drawing.Size(186, 186);
             this.pic0.TabIndex = 20;
             this.pic0.TabStop = false;
-            this.pic0.Click += new System.EventHandler(this.pic0_Click);
             // 
             // pic1
             // 
@@ -284,7 +284,6 @@ namespace BeaconHill_Coding_Test
             this.pic1.Size = new System.Drawing.Size(186, 186);
             this.pic1.TabIndex = 21;
             this.pic1.TabStop = false;
-            this.pic1.Click += new System.EventHandler(this.pictureBox1_Click);
             // 
             // pic2
             // 
@@ -295,7 +294,6 @@ namespace BeaconHill_Coding_Test
             this.pic2.Size = new System.Drawing.Size(206, 186);
             this.pic2.TabIndex = 22;
             this.pic2.TabStop = false;
-            this.pic2.Click += new System.EventHandler(this.pictureBox2_Click);
             // 
             // pic3
             // 
@@ -306,7 +304,6 @@ namespace BeaconHill_Coding_Test
             this.pic3.Size = new System.Drawing.Size(186, 186);
             this.pic3.TabIndex = 23;
             this.pic3.TabStop = false;
-            this.pic3.Click += new System.EventHandler(this.pictureBox3_Click);
             // 
             // pic4
             // 
@@ -317,7 +314,6 @@ namespace BeaconHill_Coding_Test
             this.pic4.Size = new System.Drawing.Size(186, 186);
             this.pic4.TabIndex = 24;
             this.pic4.TabStop = false;
-            this.pic4.Click += new System.EventHandler(this.pictureBox4_Click);
             // 
             // pic5
             // 
@@ -328,7 +324,6 @@ namespace BeaconHill_Coding_Test
             this.pic5.Size = new System.Drawing.Size(206, 186);
             this.pic5.TabIndex = 25;
             this.pic5.TabStop = false;
-            this.pic5.Click += new System.EventHandler(this.pictureBox5_Click);
             // 
             // pic6
             // 
@@ -339,7 +334,6 @@ namespace BeaconHill_Coding_Test
             this.pic6.Size = new System.Drawing.Size(186, 206);
             this.pic6.TabIndex = 26;
             this.pic6.TabStop = false;
-            this.pic6.Click += new System.EventHandler(this.pictureBox6_Click);
             // 
             // pic7
             // 
@@ -350,7 +344,6 @@ namespace BeaconHill_Coding_Test
             this.pic7.Size = new System.Drawing.Size(186, 206);
             this.pic7.TabIndex = 27;
             this.pic7.TabStop = false;
-            this.pic7.Click += new System.EventHandler(this.pictureBox7_Click);
             // 
             // pic8
             // 
@@ -361,7 +354,6 @@ namespace BeaconHill_Coding_Test
             this.pic8.Size = new System.Drawing.Size(206, 206);
             this.pic8.TabIndex = 28;
             this.pic8.TabStop = false;
-            this.pic8.Click += new System.EventHandler(this.pictureBox8_Click);
             // 
             // ThreeImagesLabel
             // 
@@ -374,7 +366,7 @@ namespace BeaconHill_Coding_Test
             // 
             // ScrollingImagePanel
             // 
-            this.ScrollingImagePanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.ScrollingImagePanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
             | System.Windows.Forms.AnchorStyles.Left)));
             this.ScrollingImagePanel.AutoScroll = true;
             this.ScrollingImagePanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
@@ -444,7 +436,18 @@ namespace BeaconHill_Coding_Test
             this.ScrollingImagePanel.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
-
+            pics = new List<(CheckBox check, PictureBox pic, int index)>()
+            {
+                (SelectPic0, pic0, 0),
+                (SelectPic1, pic1, 1),
+                (SelectPic2, pic2, 2),
+                (SelectPic3, pic3, 3),
+                (SelectPic4, pic4, 4),
+                (SelectPic5, pic5, 5),
+                (SelectPic6, pic6, 6),
+                (SelectPic7, pic7, 7),
+                (SelectPic8, pic8, 8),
+            };
         }
 
         private void PicPanel_Scroll(object sender, ScrollEventArgs e)
@@ -486,6 +489,6 @@ namespace BeaconHill_Coding_Test
         private Button SearchButton;
         private ImageList imageList1;
         private Button SelectImagesBtn;
-    }
+}
 }
 

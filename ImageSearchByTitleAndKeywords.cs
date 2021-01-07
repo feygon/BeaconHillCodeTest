@@ -12,6 +12,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using GoogleSearchClasses;
@@ -23,9 +25,10 @@ namespace BeaconHill_Coding_Test
     /// </summary>
     public partial class ImageSearchByTitleAndKeywords : BaseForm
     {
+        List<(CheckBox, PictureBox, int)> pics;
         List<string> keyWords = new List<string>();
-        List<Image> availableImages = new List<Image>();
-        List<(Image img, int index)> pickedImageFiles = new List<(Image img, int index)>();
+        string keyWordString;
+        List<(Image img, int index, string title)> pickedImageFiles = new List<(Image img, int index, string title)>();
 
         #region Constructor
         /// <summary>
@@ -41,8 +44,8 @@ namespace BeaconHill_Coding_Test
         // Ctrl-B clicks the bold button.
         private void Form_OnKeyboardShortCut(object Sender, OnKeyboardShortCutEventArg e)
         {
-            if (e.KeyData == (Keys.Control | Keys.B) 
-                && SlideTextRTBox.Focused 
+            if (e.KeyData == (Keys.Control | Keys.B)
+                && SlideTextRTBox.Focused
                 && SlideTextRTBox.SelectionLength > 0)
             {
                 BoldButton_Click(Sender, e);
@@ -54,37 +57,62 @@ namespace BeaconHill_Coding_Test
         {
             if (pickedImageFiles.Count > 0)
             {
-                string str = "You picked:";
+                string keyWordString = "";
+                foreach (string s in keyWords) { String.Concat(keyWordString, s, " "); }
+                string str = String.Format($"You picked {pickedImageFiles.Count.ToString()} images from keywords\n {ScanKeyWords()}:");
                 foreach (var pic in pickedImageFiles)
                 {
-                    str = string.Concat(str, "\n", pic.img.Tag); // tags have image filenames.
+                    str = string.Concat(str, "\n", pic.index); // tags have image filenames.
                 }
                 MessageBox.Show(str);
-            } else { MessageBox.Show("Please select at least one image."); }
+            }
+            else { MessageBox.Show("Please select at least one image."); }
         }
 
         private void SearchButton_Click(object sender, EventArgs e)
         {
+            List<PictureBox> pics = new List<PictureBox>() {
+                pic0, pic1, pic2, pic3, pic4, pic5, pic6, pic7, pic8 };
+
             string keyWords = ScanKeyWords();
+            this.keyWordString = String.Concat(keyWordString, keyWords);
             //RunAsync().GetAwaiter().GetResult();
-            var GoogleCustomImageSearch = new GoogleSearch(null, null);
-            var x = GoogleCustomImageSearch.TBMISCH;
-            GoogleCustomImageSearch.Options.Add(x.Key, x.Value);
+            var imageSearch = new GoogleSearch(null, null);
+            var x = imageSearch.TBMISCH;
+            imageSearch.Options.Add(x.Key, x.Value);
             //basic search
-            GoogleCustomImageSearch.Search(keyWords);
+            List<(string src, string title)> imgURLs = imageSearch.Search(keyWords);
+            //List<Task> tasks = new List<Task>();
+            int i = 0;
+            List<int> skipped = new List<int>();
+            foreach (var url in imgURLs)
+            {
+                if (url.src.StartsWith("http") && i < 9)
+                {
+                    WebRequest req = WebRequest.Create(url.src);
+                    WebResponse res = req.GetResponse();
+                    System.IO.Stream stream = res.GetResponseStream();
+                    pics[i].Image = Image.FromStream(stream);
+                    pics[i].Tag = url.title;
+                    i++;
+                } else { skipped.Add(i);}
+            };
         }
 
         private void BoldButton_Click(object sender, EventArgs e)
         {
-            int pos = SlideTextRTBox.SelectionStart, 
+            int pos = SlideTextRTBox.SelectionStart,
                 len = SlideTextRTBox.SelectionLength;
             bool isBold = SlideTextRTBox.SelectionFont.Bold;
-            if (!isBold) {
+            if (!isBold)
+            {
                 SlideTextRTBox.SelectionFont = new Font(SlideTextRTBox.Font, FontStyle.Bold);
-            } else { 
-                SlideTextRTBox.SelectionFont = SlideTextRTBox.Font; 
             }
-            
+            else
+            {
+                SlideTextRTBox.SelectionFont = SlideTextRTBox.Font;
+            }
+
             SlideTextRTBox.Focus();
             SlideTextRTBox.SelectionStart = pos;
             SlideTextRTBox.SelectionLength = len;
@@ -95,7 +123,8 @@ namespace BeaconHill_Coding_Test
         /// Get a list of parsed words from the title box
         /// </summary>
         /// <returns></returns>
-        private List<string> ScanTitle() {
+        private List<string> ScanTitle()
+        {
             string[] words = ParseAndTrim(TitleTextBox.Text);
             return words.ToList();
         }
@@ -144,19 +173,9 @@ namespace BeaconHill_Coding_Test
             PicChecked(0);
         }
 
-        private void pic0_Click(object sender, EventArgs e)
-        {
-            SelectPic0_CheckedChanged(sender, e);
-        }
-
         private void SelectPic1_CheckedChanged(object sender, EventArgs e)
         {
             PicChecked(1);
-        }
-
-        private void pictureBox1_Click(object sender, EventArgs e)
-        {
-            SelectPic1_CheckedChanged(sender, e);
         }
 
         private void SelectPic2_CheckedChanged(object sender, EventArgs e)
@@ -164,19 +183,9 @@ namespace BeaconHill_Coding_Test
             PicChecked(2);
         }
 
-        private void pictureBox2_Click(object sender, EventArgs e)
-        {
-            SelectPic2_CheckedChanged(sender, e);
-        }
-
         private void SelectPic3_CheckedChanged(object sender, EventArgs e)
         {
             PicChecked(3);
-        }
-
-        private void pictureBox3_Click(object sender, EventArgs e)
-        {
-            SelectPic3_CheckedChanged(sender, e);
         }
 
         private void SelectPic4_CheckedChanged(object sender, EventArgs e)
@@ -184,19 +193,9 @@ namespace BeaconHill_Coding_Test
             PicChecked(4);
         }
 
-        private void pictureBox4_Click(object sender, EventArgs e)
-        {
-            SelectPic4_CheckedChanged(sender, e);
-        }
-
         private void SelectPic5_CheckedChanged(object sender, EventArgs e)
         {
             PicChecked(5);
-        }
-
-        private void pictureBox5_Click(object sender, EventArgs e)
-        {
-            SelectPic5_CheckedChanged(sender, e);
         }
 
         private void SelectPic6_CheckedChanged(object sender, EventArgs e)
@@ -204,29 +203,14 @@ namespace BeaconHill_Coding_Test
             PicChecked(6);
         }
 
-        private void pictureBox6_Click(object sender, EventArgs e)
-        {
-            SelectPic6_CheckedChanged(sender, e);
-        }
-
         private void SelectPic7_CheckedChanged(object sender, EventArgs e)
         {
             PicChecked(7);
         }
 
-        private void pictureBox7_Click(object sender, EventArgs e)
-        {
-            SelectPic7_CheckedChanged(sender, e);
-        }
-
         private void SelectPic8_CheckedChanged(object sender, EventArgs e)
         {
             PicChecked(8);
-        }
-
-        private void pictureBox8_Click(object sender, EventArgs e)
-        {
-            SelectPic8_CheckedChanged(sender, e);
         }
         #endregion
         #region Helpers
@@ -240,7 +224,8 @@ namespace BeaconHill_Coding_Test
         /// </summary>
         /// <param name="str">The string to parse.</param>
         /// <returns></returns>
-        private string[] ParseAndTrim(string str) {
+        private string[] ParseAndTrim(string str)
+        {
             return new string(str.Cast<char>().Where((ltr) => char.IsLetterOrDigit(ltr)
                     || char.IsWhiteSpace(ltr)
                     || "# ,.@!'?-;/".Contains(ltr)).ToArray()
@@ -348,29 +333,27 @@ namespace BeaconHill_Coding_Test
                 case 8: box = SelectPic8; pic = pic8; index = 8; break;
                 default: throw new Exception("Bad input.");
             }
+
             if (box.CheckState == CheckState.Checked)
             {
                 if (pickedImageFiles.Count < 3)
                 {
-                    pickedImageFiles.Add((pic.Image, index));
-                    pic.BackColor = Color.Red;
+                    pickedImageFiles.Add((pic.Image, index, (string)pic.Image.Tag));
                 }
                 else
                 {
                     box.CheckState = CheckState.Unchecked;
-                    pic.BackColor = Color.Gray;
                     MessageBox.Show("Please limit your selection to 3 images.");
                 }
             }
             else
             {
-                pic.BackColor = Color.Empty;
-                if (pickedImageFiles.Contains((pic.Image, index)))
+                if (pickedImageFiles.Contains((pic.Image, index, (string)pic.Image.Tag)))
                 {
-                    pickedImageFiles.Remove((pic.Image, index));
+                    pickedImageFiles.Remove((pic.Image, index, (string)pic.Image.Tag));
                 }
             }
+            #endregion
         }
-        #endregion
     }
 }
